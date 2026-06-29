@@ -1,0 +1,36 @@
+#lui x5, 0x12345
+const shl_lui 0x1000
+const shl_im  0x100000
+const shl_b8  0x100
+const shl_b24 0x1000000
+const mov     addi + x0
+const N       11 * shl_im
+#R-type (add, sub…)
+#|funct7|rs2,rs1|funct3|rd|opcode|
+#I-type (addi, lw…)
+#imm[11:0]|rs1|funct3|rd|opcode
+#S-type (sw…)
+#imm[11:5]|rs2|rs1|funct3|imm[4:0]
+#|opcode
+#B-type (beq…)
+#im|rs2|rs1|funct3|im|opcode
+
+#t1 = compteur
+#t2 = lenght
+#t0 = file[val]
+#fp = cur sur zone ou copier file
+#file
+addi + t1 + 0
+read_file + t2 # len en oct
+# slli + t2 + _t2 + shl_im * 2
+addi + fp + N
+addi + t1 + _t1 + 4 * shl_im #i++
+jalr + _x0 + ra + loop * shl_im
+label loop
+
+read_file + t0 + _t1
+sw + _fp + t0_
+addi + fp + _fp + 1 * shl_im
+addi + t1 + _t1 + 4 * shl_im #i++
+bltu + _t1 + t2_ + 0xfe000e80
+jalr + _x0 + N

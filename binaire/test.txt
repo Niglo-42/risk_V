@@ -1,0 +1,11 @@
+main:
+mov r1, #0
+start:
+cmp r1, #10
+je end
+var age #32
+const TEN 12+ 12 * 1
+add r1, r1 TEN
+jmp start
+end:
+halt
