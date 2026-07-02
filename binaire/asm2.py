@@ -30,9 +30,10 @@ def asm(path):
     with open(path, "r") as src:
         lex = Lexer(src.read())
     lex.lexe()
-    # lex.print_token()
+    lex.print_token()
     parse = Parser()
     parse.parser(lex.tokens)
+    parse.print_ast()
     
 
 def asm_to_binary(path: str):

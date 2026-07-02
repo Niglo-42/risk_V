@@ -6,9 +6,6 @@ class TokenType(Enum):
     REG     = 1
     IDENT   = 2
     NUMBER  = 3
-    ASSIGN  = 4
-
-
 
     # syntaxe
     COMMA       = 10
@@ -27,6 +24,35 @@ class TokenType(Enum):
     LABEL_DEF   = 22
     VAR_DEF     = 23
 
+    # op
+    ASSIGN      = 30
+    ADD         = 31
+    SUB         = 32
+    MUL         = 33
+    DIV         = 34
+    MOD         = 35
+    NOT         = 36
+    AND         = 37
+    OR          = 38
+    XOR         = 39
+
+    # DATA_TYPE
+    INT         = 40
+    SHORT       = 41
+    CHAR        = 42
+    UINT        = 43
+    USHORT      = 44
+    UCHAR       = 45
+
+VARS = {
+    "int": TokenType.INT,
+    "uint": TokenType.UINT,
+    "short": TokenType.SHORT,
+    "ushort": TokenType.USHORT,
+    "char": TokenType.CHAR,
+    "uchar": TokenType.UCHAR,
+}
+
 SYMBOLS = {
     ",": TokenType.COMMA,
     ":": TokenType.COLON,
@@ -36,7 +62,21 @@ SYMBOLS = {
     "]": TokenType.RBRAKET,
     "{": TokenType.LSCOPE,
     "}": TokenType.RSCOPE,
+}
+
+OP = {
+    "(": TokenType.LPAREN,
+    ")": TokenType.RPAREN,
     "=": TokenType.ASSIGN,
+    "+": TokenType.ADD,
+    "-": TokenType.SUB,
+    "*": TokenType.MUL,
+    "/": TokenType.DIV,
+    "%": TokenType.MOD,
+    "~": TokenType.NOT,
+    "&": TokenType.AND,
+    "|": TokenType.OR,
+    "^": TokenType.XOR,
 }
 
 REGISTERS = {
@@ -141,7 +181,7 @@ class Lexer:
             self.emit(TokenType.LABEL_DEF, word[:-1])
         elif word == "const":
             self.emit(TokenType.CONST_DEF, word)
-        elif word == "var":
+        elif word in VARS:
             self.emit(TokenType.VAR_DEF, word)
         else:
             self.emit(TokenType.IDENT, word)
@@ -154,8 +194,15 @@ class Lexer:
                 self.col = 1
                 self.i += 1
                 self.line += 1
+            elif c == " ":
+                self.col += 1
+                self.i += 1
             elif c in SYMBOLS:
                 self.emit(SYMBOLS[c], c)
+                self.i += 1
+                self.col += 1
+            elif c in OP:
+                self.emit(OP[c], c)
                 self.i += 1
                 self.col += 1
             else:
@@ -170,7 +217,7 @@ class Lexer:
             self.i += 1
             self.col += 1
         while self.i < len(self.code) and not self.code[self.i].isspace()\
-            and self.code[self.i] not in SYMBOLS:
+            and self.code[self.i] not in OP and self.code[self.i] != ",":
             word.append(self.code[self.i])
             self.i += 1
         c = "".join(word)

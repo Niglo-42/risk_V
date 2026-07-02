@@ -8,47 +8,67 @@ class Type(Enum):
     U = 4
     J = 5
 
-class TypeR:
-    def __init__(self, op, type, rd, rs1, rs2):
-        self.opcode=op
-        self.type=type
-        self.rd=rd
-        self.rs1=rs1
-        self.rs2=rs2
+class DataType(Enum):
+    INT     = 0
+    SHORT   = 1
+    CHAR    = 2
+    UINT    = 3
+    USHORT  = 4
+    UCHAR   = 5
 
-class TypeI:
-    def __init__(self, op, type, rd, rs1, imm):
+class T:
+    def __init__(self, op, pc):
         self.opcode=op
+        self.pc=pc
+
+class VarDef:
+    def __init__(self, type, reg):
+        self.reg=reg
         self.type=type
+
+class TypeVar(T):
+    def __init__(self, op, pc, rd, rs1, imm):
+        super().__init__(op, pc)
         self.rd=rd
         self.rs1=rs1
         self.imm=imm
 
-class TypeU:
-    def __init__(self, op, type, rd, imm):
-        self.opcode=op
-        self.type=type
+class TypeR(T):
+    def __init__(self, op, pc, rd, rs1, rs2):
+        super().__init__(op, pc)
         self.rd=rd
-        self.imm
-
-class TypeB:
-    def __init__(self, op, type, rs1, rs2):
-        self.opcode=op
-        self.type=type
         self.rs1=rs1
         self.rs2=rs2
 
-class TypeJ:
-    def __init__(self, op, type, rd, imm):
-        self.opcode=op
-        self.type=type
+class TypeI(T):
+    def __init__(self, op, pc, rd, rs1, imm):
+        super().__init__(op, pc)
+        self.rd=rd
+        self.rs1=rs1
+        self.imm=imm
+
+class TypeU(T):
+    def __init__(self, op, pc, rd, imm):
+        super().__init__(op, pc)
         self.rd=rd
         self.imm=imm
 
-class TypeS:
-    def __init__(self, op, type, rs1, rs2):
-        self.opcode=op
-        self.type=type
+class TypeB(T):
+    def __init__(self, op, pc, rs1, rs2, label):
+        super().__init__(op, pc)
+        self.rs1=rs1
+        self.rs2=rs2
+        self.label=label
+
+class TypeJ(T):
+    def __init__(self, op, pc, rd, label):
+        super().__init__(op, pc)
+        self.rd=rd
+        self.label=label
+
+class TypeS(T):
+    def __init__(self, op, pc, rs1, rs2):
+        super().__init__(op, pc)
         self.rs1=rs1
         self.rs2=rs2
 
@@ -145,5 +165,5 @@ class Reg:
         "t6": 31
     }
 
-    def get_reg(pos: int, token: str, type: Type) ->int:
+    def get_reg(pos: int, token: str) ->int:
         return Reg.reg[token] << [7, 15, 20][pos]
