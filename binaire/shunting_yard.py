@@ -1,5 +1,3 @@
-import time
-
 def shunting_yard(toks: list[str], vars: dict) -> int:
     value = {
         "+": 2,
@@ -19,7 +17,7 @@ def shunting_yard(toks: list[str], vars: dict) -> int:
     solve_stack = []
     output = []
     input = []
-
+    print(f"{toks=}")
     for tok in toks:
         char = 0
         while char < len(tok):
@@ -67,8 +65,8 @@ def shunting_yard(toks: list[str], vars: dict) -> int:
             a = solve_stack.pop()
         if a and b:
             solve_stack.append(ops[output.pop(0)](a, b))
-        if a:
+        elif a:
             return int(a)
-        if b:
+        elif b:
             return int(b)
     return int(solve_stack[0])
