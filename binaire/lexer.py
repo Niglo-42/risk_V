@@ -176,7 +176,7 @@ class Lexer:
         elif word.startswith("#"):
             self.emit(TokenType.NUMBER, word[1:])
         elif word.startswith(";"):
-            return
+            return -1
         elif word.endswith(":"):
             self.emit(TokenType.LABEL_DEF, word[:-1])
         elif word == "const":
@@ -208,8 +208,11 @@ class Lexer:
             else:
                 word = self.read_word()
                 if word:
-                    self.match_word(word)
-                    self.col += len(word)
+                    if self.match_word(word) == -1:
+                        while self.code[self.i] and self.code[self.i] != "\n":
+                            self.i += 1
+                    else:
+                        self.col += len(word)
     
     def read_word(self):
         word = []

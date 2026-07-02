@@ -22,16 +22,10 @@ class T:
         self.pc=pc
 
 class VarDef:
-    def __init__(self, type, reg):
+    def __init__(self, type, reg, value):
         self.reg=reg
         self.type=type
-
-class TypeVar(T):
-    def __init__(self, op, pc, rd, rs1, imm):
-        super().__init__(op, pc)
-        self.rd=rd
-        self.rs1=rs1
-        self.imm=imm
+        self.value=value
 
 class TypeR(T):
     def __init__(self, op, pc, rd, rs1, rs2):
@@ -122,6 +116,30 @@ class Instruction:
     "read_file": (0x20000000, Type.R),
     "halt":      (0xFFFFFFF0, Type.R),
     }
+
+    op_reg = {
+    "+": "add",
+    "-": "sub",
+    "*": "mul",
+    "/": "div",
+    "%": "mod",
+    "~": "not",
+    "&": "and",
+    "|": "or",
+    "^": "xor",
+}
+    
+    op_imm = {
+    "+": "addi",
+    "-": "subi",
+    "*": "muli",
+    "/": "divi",
+    "%": "modi",
+    "~": "noti",
+    "&": "andi",
+    "|": "ori",
+    "^": "xori",
+}
 
     def get_opcode_type(name: str):
         val =  Instruction.tab.get(name)

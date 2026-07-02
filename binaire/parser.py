@@ -1,5 +1,5 @@
 from data_asm import Type, Instruction, TypeB, TypeI, \
-TypeJ, TypeR, TypeS, TypeU, TypeVar, VarDef
+TypeJ, TypeR, TypeS, TypeU, VarDef
 from shunting_yard import shunting_yard
 from lexer import Token, TokenType, OP, VARS
 
@@ -75,13 +75,23 @@ val = '{t.value}' not accepted")
             if line[1].type != TokenType.ASSIGN:
                 raise ParsingError(f"error at line {line[0].line} col {line[0].col}")
             elif line[2].type != TokenType.IDENT:
-                raise ParsingError(f"error at line {line[0].line} col {line[0].col}")
+                raise ParsingError(f"error at line {line[0].line} col {line[0].col}"
+                                   f"at least one var is required")
             elif self.vars.get(line[0].value) == None:
                 raise ParsingError(f"error at line {line[0].line} col {line[0].col}"
                                    f"{line[0].value} has not been defined")
             else:
                 expr = []
-                expr.append(line[2].value)
+                first_reg = line[2].value
+                if len(line) == 3:
+                    var = TypeI(Token(
+                    TokenType.OPCODE, "addi", line[1].line, line[1].col),
+                    self.pc,
+                    Token(TokenType.REG, self.vars[line[0].value].reg, 0, 0),
+                    Token(TokenType.REG, self.vars[first_reg].reg, 0, 0), 0)
+                    self.pc += 1
+                    self.ast.append(var)
+                    return # addi rd, 
                 for t in line[3:]:
                     if t.type != TokenType.NUMBER\
                         and t.value not in OP and self.vars.get(t.value) == None:
@@ -89,26 +99,28 @@ val = '{t.value}' not accepted")
                             f"error at line {line[0].line} col {line[0].col}"
                             f"val = '{t.value}' not accepted")
                     else:
-                        if t.value != line[0].value:
-                            is_type_r = 1
-                            second_reg = t.value
-                            if len(line) != 5:
-                                raise ParsingError(f"error at line {line[0].line} col {line[0].col}")
                         expr.append(t.value)
+                if all(x.value in OP or x.type == TokenType.IDENT for x in line[3:]):
+                    if len(line) != 5:
+                        raise ParsingError(f"error at line {line[0].line} col {line[0].col}")
+                    is_type_r = 1
+                    operator = line[3].value
+                    second_reg = line[4].value
+                operator = line[3].value
                 if is_type_r:
-                    var = TypeVar(Token(
-                    TokenType.OPCODE, "add", line[1].line, line[1].col),
+                    var = TypeR(Token(
+                    TokenType.OPCODE, Instruction.op_reg[operator], line[1].line, line[1].col),
                     self.pc,
-                    Token(TokenType.REG, line[0].value, 0, 0),
-                    Token(TokenType.REG, line[0].value, 0, 0),
-                    Token(TokenType.REG, second_reg, 0, 0))
+                    Token(TokenType.REG, self.vars[line[0].value].reg, 0, 0),
+                    Token(TokenType.REG, self.vars[first_reg].reg, 0, 0),
+                    Token(TokenType.REG, self.vars[second_reg].reg, 0, 0))
                 else:
-                    var = TypeVar(Token(
-                    TokenType.OPCODE, "addi", line[1].line, line[1].col),
+                    var = TypeI(Token(
+                    TokenType.OPCODE, Instruction.op_imm[operator], line[1].line, line[1].col),
                     self.pc,
-                    Token(TokenType.REG, self.reg[self.index_reg], 0, 0),
+                    Token(TokenType.REG, self.vars[first_reg].reg, 0, 0),
                     Token(TokenType.REG, "x0", 0, 0),
-                    shunting_yard(expr, self.vars))
+                    shunting_yard(expr, 0))
                 self.pc += 1
                 self.ast.append(var)
             
@@ -124,7 +136,7 @@ val = '{t.value}' not accepted")
             else:
                 if self.vars.get(line[1].value) ==  None:
                     self.vars[line[1].value] = VarDef(VARS[line[0]],
-                                                       self.reg[self.index_reg])
+                                                       self.reg[self.index_reg], 0)
                     self.index_reg += 1
                 else:
                     raise ParsingError(f"Duplicate var def for {line[1].value}"
@@ -137,8 +149,8 @@ val = '{t.value}' not accepted")
 val = '{t.value}' not accepted")
                 else:
                     expr.append(t.value)
-            self.vars[line[1].value] = VarDef(VARS[line[0].value], self.reg[self.index_reg])
-            var = TypeVar(Token(
+            self.vars[line[1].value] = VarDef(VARS[line[0].value], self.reg[self.index_reg], int(line[3].value))
+            var = TypeI(Token(
                 TokenType.OPCODE, "addi", line[1].line, line[1].col),
                 self.pc,
                 Token(TokenType.REG, self.reg[self.index_reg], 0, 0),
@@ -266,11 +278,6 @@ val = '{t.value}' not accepted")
                       instr.rs1.value, instr.rs2.value)
                 print()
             elif isinstance(instr, TypeI):
-                print(f"Instru line: {instr.pc}", end=" ")
-                print(instr.opcode.value, instr.rd.value,
-                      instr.rs1.value, instr.imm)
-                print()
-            elif isinstance(instr, TypeVar):
                 print(f"Instru line: {instr.pc}", end=" ")
                 print(instr.opcode.value, instr.rd.value,
                       instr.rs1.value, instr.imm)
